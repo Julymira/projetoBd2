@@ -1,0 +1,45 @@
+criar tabela
+CREATE DATABASE "ComparacaoDB"
+criar tabela criterios
+CREATE TABLE IF NOT EXISTS public.criteriosdecomparacao
+(
+    criterio_id integer NOT NULL DEFAULT nextval('criteriosdecomparacao_criterio_id_seq'::regclass),
+    nome character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    descricao text COLLATE pg_catalog."default",
+    CONSTRAINT criteriosdecomparacao_pkey PRIMARY KEY (criterio_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.criteriosdecomparacao
+    OWNER to postgres;
+
+criar tabela comparacao
+CREATE TABLE IF NOT EXISTS public.comparacao
+(
+    id serial,
+    obj1_nota integer NOT NULL,
+    obj1_peso integer NOT NULL,
+    obj2_nota integer NOT NULL,
+    obj2_peso integer NOT NULL,
+    obj3_nota integer NOT NULL,
+    obj3_peso integer NOT NULL,
+    criterio_id_fk bigint,
+    CONSTRAINT comparacao_pkey PRIMARY KEY (id),
+    CONSTRAINT fkh6mh0emknc6w66443fq9k1f6u FOREIGN KEY (criterio_id_fk)
+        REFERENCES public.criteriosdecomparacao (criterio_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT comparacao_obj1_nota_check CHECK (obj1_nota > 0 AND obj1_nota < 6),
+    CONSTRAINT comparacao_obj1_peso_check CHECK (obj1_peso > 0 AND obj1_peso < 4),
+    CONSTRAINT comparacao_obj2_nota_check CHECK (obj2_nota > 0 AND obj2_nota < 6),
+    CONSTRAINT comparacao_obj2_peso_peso_check CHECK (obj2_peso > 0 AND obj2_peso < 4),
+    CONSTRAINT comparacao_obj3_nota_check CHECK (obj3_nota > 0 AND obj3_nota < 6),
+    CONSTRAINT comparacao_obj3_peso_check CHECK (obj3_peso > 0 AND obj3_peso < 4)
+)
+
+criar vier pro resultado
+Create view resultado as
+	select co.id, com.nome, (co.obj1_nota*co.obj1_peso+
+	co.obj2_nota*co.obj2_peso+
+	co.obj3_nota*co.obj3_peso) as resultado from criteriosdecomparacao com inner join comparacao co on com.criterio_id = co.criterio_id_fk
